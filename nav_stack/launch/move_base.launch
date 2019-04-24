@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+
+<launch>
+
+   <master auto="start"/>
+ 
+<!-- Run the map server--> 
+  <!--<node name="map_server" pkg="map_server" type="map_server" args="$(find avc)/map/basement/map.yaml my_map_resolution"/>-->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find nav_stack)/maps/curvy_actual_black.yaml my_map_resolution"/>
+  <!--<node name="map_server" pkg="map_server" type="map_server" args="$(find nav_stack)/maps/mikel2.yaml"/>-->
+  <!--<node name="map_server" pkg="map_server" type="map_server" args="$(find nav_stack)/maps/map.yaml"/>-->
+
+  <!--navigation tutorial says to use map.pgm here, but I think it should be map.yaml . . .?-->
+
+ <!--- Run AMCL -->
+    <include file="$(find avc)/launch/includes/amcl/amcl.launch.xml" />
+<!--<include file="$(find amcl)/examples/amcl_diff.launch" />-->
+
+   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <rosparam file="$(find nav_stack)/config/costmap_common_params.yaml" command="load" ns="global_costmap" /> 
+    <rosparam file="$(find nav_stack)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find nav_stack)/config/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find nav_stack)/config/global_costmap_params.yaml" command="load" /> 
+    <rosparam file="$(find nav_stack)/config/base_local_planner_params.yaml" command="load" />
+    <!-- Three lparameters below were added as explained in the voronoi_planner tutorial-->
+   <!-- <param name="base_global_planner" value="voronoi_planner/VoronoiPlanner"/>-->
+<!--<param name="global_costmap/width" value="35.0" if="$(arg no_static_map)"/>
+    <param name="global_costmap/height" value="35.0" if="$(arg no_static_map)"/>
+ -->
+    <!-- Two parameters below were added as explained in the teb_local_planner tutorial-->
+    <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
+    <param name="controller_frequency" value="10.0" /> 
+    <!-- see last year's avc/move_base.yaml; the below parameters were taken from there-->
+    <param name="recovery_behavior_enabled" value="true"/>
+    <param name="clearing_rotation_allowed" value="false"/>
+    <param name="conservative_reset_dist" value="4.5"/>
+
+    <!-- Load all costmap_2d and planner parameters here -->
+    <!-- LOAD COSTMAP_CONVERTER PARAMETERS HERE -->
+    <rosparam file="$(find nav_stack)/config/costmap_converter_params.yaml" command="load" />
+
+ </node>
+
+</launch> 

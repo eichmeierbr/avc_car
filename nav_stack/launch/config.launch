@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+
+<launch>
+  <master auto="start"/>
+
+
+  <!--Port Configurations-->
+  <rosparam file="$(find traxxas_driver)/port_config.yaml" command="load"/>
+  
+  <!--traxxas driver node and assosiated parameters-->
+ <!--<include file="$(find traxxas_driver)/traxxas_driver.launch" /> -->
+ <include file="$(find joy_to_traxxas)/joy.launch"/>
+ <node name="traxxas_cmd_mux_node" pkg="traxxas_cmd_mux" type="traxxas_cmd_mux_node.py"/>
+  <node name="cmd_vel_to_ackermann_node" pkg="cmd_vel_to_ackermann" type="cmd_vel_to_ackermann.py"/> 
+
+  <arg name="model" default="$(find avc)/urdf/model.urdf"/>
+ 
+   <param name="robot_description" command="$(find xacro)/xacro --inorder '$(arg model)'" /> 
+ 
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+
+  <!-- start static transforms -->
+  <include file="$(find avc)/launch/includes/sensors/static_transforms.launch.xml" />
+
+
+
+<!-- laser -->
+  <arg name="laser_config" default="$(find nav_stack)/config/laser.yaml" />
+  <node pkg="sick_tim" type="sick_tim551_2050001" name="laser_node" respawn="false" output="screen">
+    <rosparam file="$(arg laser_config)" command="load" />
+  </node>
+ 
+
+<!-- IMU -->
+<!--<include file="$(find razor_imu_9dof)/launch/razor-pub.launch" />-->
+ <include file="$(find traxxas_to_odom)/launch/wheel_odometry.launch" />
+ <!-- imu
+  <arg name="imu_config" default="$(find nav_stack)/config/imu.yaml" />
+  <node pkg="razor_imu_9dof" type="imu_node.py" name="imu_node" output="screen">
+    <rosparam file="$(arg imu_config)" command="load" />
+  </node> -->
+
+
+<!-- Cartographer -->
+ <!-- <node name="cartographer_node" pkg="cartographer_ros"
+      type="cartographer_node" args="
+          -configuration_directory $(find cartographer_ros)/configuration_files
+          -configuration_basename backpack_2d.lua"
+      output="screen">
+  </node>
+
+ <node name="cartographer_occupancy_grid_node" pkg="cartographer_ros"
+      type="cartographer_occupancy_grid_node" args="-resolution 0.05" /> -->
+
+<!-- Gmapping -->
+<!--  <node pkg="gmapping" type="slam_gmapping" name="gmapping" output="screen"> -->
+<!--    <remap from="scan" to="/sensors/scan" />
+    <remap from="odom" to="/vesc/odom" /> -->
+<!--    <param name="xmin" value="-8.0" />
+    <param name="ymin" value="-8.0" />
+    <param name="xmax" value="8.0" />
+    <param name="ymax" value="8.0" />
+    <param name="delta" value="0.1" />
+  </node> -->                             
+
+
+<!-- EKF -->
+  <node pkg="ekf" type="ekfnode.py" name="ekfnode" respawn="false" output="screen"/>
+
+
+<!-- RVIZ Setup -->
+<!-- <arg name="rvizconfig" default="$(find nav_stack)/rviz/test.rviz" />-->
+
+ <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />--> 
+
+
+</launch>

@@ -1,0 +1,8 @@
+<launch>
+ <master auto="start"/>
+ <!-- the directory for the included launch file will need to be changed when this file is moved to the AVC team's master package -->
+<include file="$(find traxxas_driver)/traxxas_driver.launch" />
+
+ <rosparam file="$(find traxxas_driver)/port_config.yaml" command="load"/>
+
+</launch>

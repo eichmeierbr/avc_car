@@ -1,0 +1,14 @@
+<!-- -*- mode: XML -*- -->
+<launch>
+  <arg name="joy_teleop_config"
+       default="$(find avc)/config/joy_teleop.yaml" />
+
+  <rosparam file="$(arg joy_teleop_config)" command="load" />
+
+  <node pkg="joy" type="joy_node" name="joy_node" />
+
+  <node pkg="joy_teleop" type="joy_teleop.py" name="joy_teleop">
+    <remap from="/teleop/ackermann_cmd_mux/input/teleop" to="/vesc/ackermann_cmd_mux/input/teleop"/>
+  </node>
+
+</launch>

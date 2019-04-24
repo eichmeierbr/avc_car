@@ -1,0 +1,3 @@
+PortConfig:
+ traxxas_driver_port: "ttyACM0" #Serial port for Arduino
+ #place port info for other sensors and controllers here

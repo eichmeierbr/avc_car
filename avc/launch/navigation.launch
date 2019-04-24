@@ -1,0 +1,20 @@
+<launch>
+
+  <remap from="map" to="/map/map" />
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <remap from="map_server" to="/map/map_server" />
+    <rosparam file="$(find avc)/config/nav/move_base.yaml" command="load" />
+    <rosparam file="$(find avc)/config/nav/costmap_common.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find avc)/config/nav/costmap_common.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find avc)/config/nav/costmap_local.yaml" command="load" />
+    <rosparam file="$(find avc)/config/nav/costmap_global.yaml" command="load" />
+    <rosparam file="$(find avc)/config/nav/local_planner.yaml" command="load" />
+  </node>
+
+  <node pkg="avc" type="cmd_vel_to_ackermann_drive.py" name="cmd_vel_to_ackermann_drive" output="screen">
+    <param name="twist_cmd_topic" value="/cmd_vel" />
+    <param name="ackermann_cmd_topic" value="/vesc/ackermann_cmd_mux/input/navigation" />
+    <param name="wheelbase" value="0.33" />
+  </node>
+
+</launch>

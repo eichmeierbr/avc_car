@@ -1,0 +1,10 @@
+<launch>
+  <include file="$(find traxxas)/launch/traxxas_driver.launch" />
+  
+  <node name="teleop_node" pkg="traxxas" type="teleop_node" output="screen"/>
+  <node name="joy" pkg="joy" type="joy_node" output="screen"/>  
+
+  <rosparam file="$(find traxxas)/config/traxxas_params.yaml" command="load"/>
+  <rosparam file="$(find traxxas)/config/port_config.yaml" command="load"/>
+
+</launch>

@@ -1,0 +1,388 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="traxxas">
+    <xacro:include filename="GPS.xacro"/>
+    <xacro:include filename="magnetometer.xacro"/>
+    <xacro:include filename="imu.xacro"/>
+    <!--- File Properties -->
+
+    <!-- physics properties -->
+    <xacro:property name="physics_mu1" value="1"/>
+    <xacro:property name="physics_mu2" value="1"/>
+    <xacro:property name="physics_min_depth" value="0.05"/>
+    <xacro:property name="physics_kp" value="1e8"/>
+
+    <!-- wheel properties -->
+    <xacro:property name="wheel_radius" value="0.054"/>
+    <xacro:property name="wheel_width" value="0.042"/>
+    <xacro:property name="wheel_mass" value=".5"/>
+    <xacro:property name="wheel_limit" value="${pi/6}"/>
+    <xacro:property name="wheel_mesh" value="package://traxxas_ros_gazebo/meshes/wheel.obj"/>
+
+    <!-- chassis properties -->
+    <xacro:property name="chassis_mass" value="10"/>
+    <xacro:property name="chassis_width" value="0.3"/>
+    <xacro:property name="chassis_length" value="0.65"/>
+    <xacro:property name="chassis_height" value="0.15"/>
+    <xacro:property name="chassis_z_offset" value="0.07"/>
+    <xacro:property name="chassis_y_offset" value="0.07"/>
+    <xacro:property name="collision_width" value="0.05"/>
+    <xacro:property name="collision_side_length" value="0.2"/>
+    <xacro:property name="collision_front_rear_length" value="0.3"/>
+    <xacro:property name="collision_height" value="0.1"/>
+    <xacro:property name="chassis_mesh" value="package://traxxas_ros_gazebo/meshes/body.obj"/>
+
+    <!-- axle properties -->
+    <xacro:property name="axle_mass" value=".05"/>
+
+    <!-- steering properties -->
+    <xacro:property name="steering_effort" value="100"/>
+    <xacro:property name="steering_velocity" value="100"/>
+
+    <!-- sensor properties -->
+    <xacro:property name="sensor_mass" value="0.1"/>
+    <xacro:property name="sensor_inertia" value="0.0001"/>
+
+    <!-- base_link properties -->
+    <xacro:property name="base_link_mass" value="0.1"/>
+    <xacro:property name="base_link_inertia" value="0.00001"/>
+
+    <!-- steering_wheel properties -->
+    <xacro:property name="steering_wheel_mass" value="0.1"/>
+    <xacro:property name="steering_wheel_inertia" value="0.00001"/>
+    <xacro:property name="steering_wheel_limit" value="${pi}"/>
+
+    <!--- Links -->
+
+    <xacro:macro name="wheel_physics" params="name">
+        <gazebo reference="${name}_wheel">
+            <mu1>${physics_mu1}</mu1>
+            <mu2>${physics_mu2}</mu2>
+            <minDepth>${physics_min_depth}</minDepth>
+            <kp>${physics_kp}</kp>
+        </gazebo>
+    </xacro:macro>
+
+    <xacro:wheel_physics name="front_left"/>
+    <xacro:wheel_physics name="front_right"/>
+    <xacro:wheel_physics name="rear_left"/>
+    <xacro:wheel_physics name="rear_right"/>
+
+    <link name="base_link">
+        <inertial>
+            <mass value="${base_link_mass}"/>
+            <inertia ixx="${base_link_inertia}" ixy="0.0" ixz="0.0" iyy="${base_link_inertia}" iyz="0.0"
+                     izz="${base_link_inertia}"/>
+        </inertial>
+    </link>
+
+    <link name="steering_wheel">
+        <inertial>
+            <mass value="${steering_wheel_mass}"/>
+            <inertia ixx="${steering_wheel_inertia}" ixy="0.0" ixz="0.0" iyy="${steering_wheel_inertia}" iyz="0.0"
+                     izz="${steering_wheel_inertia}"/>
+        </inertial>
+    </link>
+
+    <xacro:macro name="chassis_collision" params="name *center *shape">
+        <collision name="${name}_collision">
+            <xacro:insert_block name="center"/>
+            <geometry>
+                <xacro:insert_block name="shape"/>
+            </geometry>
+        </collision>
+    </xacro:macro>
+
+    <link name="chassis">
+        <visual>
+            <origin xyz="0 0 ${-chassis_z_offset}" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="${chassis_mesh}" scale="0.1 0.1 0.1"/>
+            </geometry>
+        </visual>
+        <xacro:chassis_collision name="front">
+            <origin xyz="0 ${chassis_length/2-collision_width/2+chassis_y_offset} 0"/>
+            <box size="${chassis_width} ${collision_width} ${collision_height}"/>
+        </xacro:chassis_collision>
+        <xacro:chassis_collision name="rear">
+            <origin xyz="0 ${-chassis_length/2+collision_width/2+chassis_y_offset} 0"/>
+            <box size="${chassis_width/2} ${collision_width} ${collision_height}"/>
+        </xacro:chassis_collision>
+        <xacro:chassis_collision name="right">
+            <origin xyz="${chassis_width/2-collision_width/2} ${chassis_y_offset/4} 0"/>
+            <box size="${collision_width} ${collision_side_length} ${collision_height}"/>
+        </xacro:chassis_collision>
+        <xacro:chassis_collision name="left">
+            <origin xyz="${-chassis_width/2+collision_width/2} ${chassis_y_offset/4} 0"/>
+            <box size="${collision_width} ${collision_side_length} ${collision_height}"/>
+        </xacro:chassis_collision>
+        <inertial>
+            <mass value="${chassis_mass}"/>
+            <origin xyz="0 ${chassis_y_offset} 0" rpy="0 0 0"/>
+            <inertia ixx="${1/12*chassis_mass*(chassis_height**2+chassis_length**2)}" ixy="0.0" ixz="0.0"
+                     iyy="${1/12*chassis_mass*(chassis_width**2+chassis_height**2)}" iyz="0.0"
+                     izz="${1/12*chassis_mass*(chassis_width**2+chassis_length**2)}"/>
+        </inertial>
+    </link>
+
+    <xacro:macro name="declare_axle" params="name reflect">
+        <link name="${name}">
+            <inertial>
+                <mass value="${axle_mass}"/>
+                <origin xyz="${reflect*wheel_width/2} 0 0.0025" rpy="0 0 0"/>
+                <inertia ixx="${1/2*axle_mass*wheel_radius**2}" ixy="0.0" ixz="0.0"
+                         iyy="${1/12*axle_mass*(3*wheel_radius**2+wheel_width**2)}" iyz="0.0"
+                         izz="${1/12*axle_mass*(3*wheel_radius**2+wheel_width**2)}"/>
+            </inertial>
+        </link>
+    </xacro:macro>
+
+    <xacro:declare_axle name="fl_axle" reflect="-1"/>
+    <xacro:declare_axle name="fr_axle" reflect="1"/>
+
+    <xacro:macro name="declare_wheel" params="name reflect rotate">
+        <link name="${name}_wheel">
+            <inertial>
+                <mass value="${wheel_mass}"/>
+                <origin xyz="${reflect*wheel_width/2} 0 0" rpy="0 0 0"/>
+                <inertia ixx="${1/2*wheel_mass*wheel_radius**2}" ixy="0.0" ixz="0.0"
+                         iyy="${1/12*wheel_mass*(3*wheel_radius**2+wheel_width**2)}" iyz="0.0"
+                         izz="${1/12*wheel_mass*(3*wheel_radius**2+wheel_width**2)}"/>
+            </inertial>
+            <collision name="${name}_wheel_collision">
+                <geometry>
+                    <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+                </geometry>
+                <origin xyz="${reflect*wheel_width/2} 0 0" rpy="0 ${pi/2} 0"/>
+            </collision>
+            <visual>
+                <origin xyz="0 0 0" rpy="0 ${rotate} 0"/>
+                <geometry>
+                    <mesh filename="${wheel_mesh}" scale="0.1 0.1 0.1"/>
+                </geometry>
+            </visual>
+        </link>
+    </xacro:macro>
+
+    <xacro:declare_wheel name="front_left" reflect="-1" rotate="${pi}"/>
+    <xacro:declare_wheel name="front_right" reflect="1" rotate="0"/>
+    <xacro:declare_wheel name="rear_left" reflect="-1" rotate="${pi}"/>
+    <xacro:declare_wheel name="rear_right" reflect="1" rotate="0"/>
+
+    <!--- Joints -->
+
+    <joint name="base_link_connection" type="fixed">
+        <parent link="base_link"/>
+        <child link="chassis"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <axis xyz="1 0 0"/>
+    </joint>
+
+    <xacro:macro name="steer_joint" params="name child *shape *limits">
+        <joint name="${name}_joint" type="revolute">
+            <xacro:insert_block name="shape"/>
+            <parent link="chassis"/>
+            <child link="${child}"/>
+            <axis xyz="0 0 1"/>
+            <xacro:insert_block name="limits"/>
+            <!--<dynamics damping="10" friction="1"/>-->
+        </joint>
+    </xacro:macro>
+
+    <xacro:steer_joint name="steering" child="steering_wheel">
+        <origin xyz="0 0 0.03" rpy="0 0 0"/>
+        <limit lower="${-steering_wheel_limit}" upper="${steering_wheel_limit}" effort="${steering_effort}"
+               velocity="${steering_velocity}"/>
+    </xacro:steer_joint>
+
+    <xacro:steer_joint name="front_left_steer" child="fl_axle">
+        <origin xyz="-0.12 0.2 -0.02" rpy="0 0 0"/>
+        <limit lower="${-wheel_limit}" upper="${wheel_limit}" effort="${steering_effort}"
+               velocity="${steering_velocity}"/>
+    </xacro:steer_joint>
+
+    <xacro:steer_joint name="front_right_steer" child="fr_axle">
+        <origin xyz="0.12 0.2 -0.02" rpy="0 0 0"/>
+        <limit lower="${-wheel_limit}" upper="${wheel_limit}" effort="${steering_effort}"
+               velocity="${steering_velocity}"/>
+    </xacro:steer_joint>
+
+    <xacro:macro name="wheel_joint" params="name parent *shape">
+        <joint name="${name}_wheel_joint" type="continuous">
+            <parent link="${parent}"/>
+            <child link="${name}_wheel"/>
+            <xacro:insert_block name="shape"/>
+            <dynamics damping="0.1" friction="0.01"/>
+            <axis xyz="-1 0 0"/>
+        </joint>
+    </xacro:macro>
+
+    <xacro:wheel_joint name="front_left" parent="fl_axle">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:wheel_joint>
+    <xacro:wheel_joint name="front_right" parent="fr_axle">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:wheel_joint>
+    <xacro:wheel_joint name="rear_left" parent="chassis">
+        <origin xyz="-0.12 -0.175 -0.02" rpy="0 0 0"/>
+    </xacro:wheel_joint>
+    <xacro:wheel_joint name="rear_right" parent="chassis">
+        <origin xyz="0.12 -0.175 -0.02" rpy="0 0 0"/>
+    </xacro:wheel_joint>
+
+    <!-- Sensor links and fixed joints -->
+
+    <link name="center_laser_link">
+        <inertial>
+            <mass value="${sensor_mass}"/>
+            <inertia ixx="${sensor_inertia}" ixy="0.0" ixz="0.0" iyy="${sensor_inertia}" iyz="0.0"
+                     izz="${sensor_inertia}"/>
+        </inertial>
+    </link>
+
+    <joint name="center_laser_joint" type="fixed">
+        <parent link="chassis"/>
+        <child link="center_laser_link"/>
+        <origin xyz="0 0.2 0.05" rpy="0 0 ${pi/2}"/>
+    </joint>
+
+    <gazebo reference="base_link_connection">
+        <disableFixedJointLumping>true</disableFixedJointLumping>
+    </gazebo>
+
+    <link name="front_camera_link">
+        <inertial>
+            <mass value="${sensor_mass}"/>
+            <inertia ixx="${sensor_inertia}" ixy="0.0" ixz="0.0" iyy="${sensor_inertia}" iyz="0.0"
+                     izz="${sensor_inertia}"/>
+        </inertial>
+    </link>
+
+    <joint name="front_camera_joint" type="fixed">
+        <parent link="chassis"/>
+        <child link="front_camera_link"/>
+        <origin xyz="0 0.2 0.1" rpy="0 0 ${pi/2}"/>
+    </joint>
+
+    <gazebo>
+        <plugin name="prius__drive" filename="libTraxxasPlugin.so">
+            <chassis>chassis</chassis>
+            <front_left_wheel>front_left_wheel_joint</front_left_wheel>
+            <front_right_wheel>front_right_wheel_joint</front_right_wheel>
+            <front_left_wheel_steering>front_left_steer_joint</front_left_wheel_steering>
+            <front_right_wheel_steering>front_right_steer_joint</front_right_wheel_steering>
+            <back_left_wheel>rear_left_wheel_joint</back_left_wheel>
+            <back_right_wheel>rear_right_wheel_joint</back_right_wheel>
+            <steering_wheel>steering_joint</steering_wheel>
+            <chassis_aero_force_gain>0.01</chassis_aero_force_gain>
+            <front_torque>10</front_torque>
+            <back_torque>10</back_torque>
+            <front_brake_torque>10</front_brake_torque>
+            <back_brake_torque>10</back_brake_torque>
+            <max_speed>20</max_speed>
+            <max_steer>0.6458</max_steer>
+            <flwheel_steering_p_gain>1e1</flwheel_steering_p_gain>
+            <frwheel_steering_p_gain>1e1</frwheel_steering_p_gain>
+            <flwheel_steering_i_gain>0</flwheel_steering_i_gain>
+            <frwheel_steering_i_gain>0</frwheel_steering_i_gain>
+            <flwheel_steering_d_gain>1</flwheel_steering_d_gain>
+            <frwheel_steering_d_gain>1</frwheel_steering_d_gain>
+        </plugin>
+    </gazebo>
+
+    <gazebo>
+        <plugin name="joint_state_publisher" filename="libgazebo_ros_joint_state_publisher.so">
+            <!-- <robotNamespace>/traxxas</robotNamespace> -->
+            <jointName>rear_right_wheel_joint, rear_left_wheel_joint, front_right_wheel_joint, front_left_wheel_joint,
+                front_right_steer_joint, front_left_steer_joint, steering_joint
+            </jointName>
+            <updateRate>100.0</updateRate>
+            <alwaysOn>true</alwaysOn>
+        </plugin>
+    </gazebo>
+
+    <gazebo>
+        <plugin name="p3d" filename="libgazebo_ros_p3d.so">
+            <!-- <robotNamespace>/traxxas</robotNamespace> -->
+            <bodyName>base_link</bodyName>
+            <topicName>base_pose_ground_truth</topicName>
+            <frameName>map</frameName>
+            <updateRate>100.0</updateRate>
+        </plugin>
+    </gazebo>
+
+    <gazebo reference="center_laser_link">
+        <sensor name='center_laser_sensor' type='ray'>
+            <ray>
+                <scan>
+                    <horizontal>
+                        <samples>270</samples>
+                        <resolution>1</resolution>
+                        <min_angle>${-270/2*pi/180}</min_angle>
+                        <max_angle>${270/2*pi/180}</max_angle>
+                    </horizontal>
+                    <vertical>
+                        <samples>1</samples>
+                        <min_angle>0.01</min_angle>
+                        <max_angle>0.01</max_angle>
+                    </vertical>
+                </scan>
+                <range>
+                    <min>0.2</min>
+                    <max>8</max>
+                    <resolution>0.01</resolution>
+                </range>
+            </ray>
+            <plugin name='center_laser' filename='libgazebo_ros_custom_block_laser_plugin.so'>
+                <topicName>/traxxas/center_laser/scan</topicName>
+                <frameName>center_laser_link</frameName>
+            </plugin>
+            <always_on>1</always_on>
+            <update_rate>30</update_rate>
+            <visualize>0</visualize>
+        </sensor>
+    </gazebo>
+
+    <gazebo reference="front_camera_link">
+        <sensor type="camera" name="front_camera_sensor">
+            <update_rate>30.0</update_rate>
+            <camera name="front_camera">
+                <horizontal_fov>1.3962634</horizontal_fov>
+                <image>
+                    <width>800</width>
+                    <height>800</height>
+                    <format>R8G8B8</format>
+                </image>
+                <clip>
+                    <near>0.02</near>
+                    <far>300</far>
+                </clip>
+                <noise>
+                    <type>gaussian</type>
+                    <mean>0.0</mean>
+                    <stddev>0.007</stddev>
+                </noise>
+            </camera>
+            <plugin name="front_camera_controller" filename="libgazebo_ros_camera.so">
+                <alwaysOn>false</alwaysOn>
+                <updateRate>0.0</updateRate>
+                <cameraName>/traxxas/front_camera</cameraName>
+                <imageTopicName>image_raw</imageTopicName>
+                <cameraInfoTopicName>/traxxas/front_camera_info</cameraInfoTopicName>
+                <frameName>camera_link</frameName>
+                <hackBaseline>0.07</hackBaseline>
+                <distortionK1>0.0</distortionK1>
+                <distortionK2>0.0</distortionK2>
+                <distortionK3>0.0</distortionK3>
+                <distortionT1>0.0</distortionT1>
+                <distortionT2>0.0</distortionT2>
+            </plugin>
+        </sensor>
+    </gazebo>
+
+    <xacro:gps_plugin_macro namespace="/traxxas/gps" parent_link="base_link"/>
+
+    <xacro:imu_plugin_macro namespace="/traxxas/imu" parent_link="base_link"/>
+
+    <xacro:magnetometer_plugin_macro namespace="/traxxas/mag" parent_link="base_link"/>
+
+</robot>

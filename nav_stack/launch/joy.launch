@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <rosparam file="$(find traxxas)/config/port_config.yaml" command="load"/>
+  
+ <include file="$(find traxxas)/launch/joy.launch"/>
+ <node name="traxxas_cmd_mux_node" pkg="traxxas" type="traxxas_cmd_mux_node.py"/>
+  <node name="cmd_vel_to_ackermann_node" pkg="cmd_vel_to_ackermann" type="cmd_vel_to_ackermann.py"/> 
+
+  <arg name="model" default="$(find avc)/urdf/model.urdf"/>
+ 
+   <param name="robot_description" command="$(find xacro)/xacro --inorder '$(arg model)'" /> 
+ 
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+
+  <include file="$(find avc)/launch/includes/sensors/static_transforms.launch.xml" />
+
+</launch>

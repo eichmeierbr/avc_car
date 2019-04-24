@@ -1,0 +1,24 @@
+TraxxasParameters:
+  diff_gear_ratio: 2.85 #ratio from spur gear rotation to wheel rotation
+  wheel_radius: 0.05 #meters
+  max_right_steering_angle: -0.65 # these default values tend to give 1 degree accuracy #-0.5235987756 #radians (-30 deg)
+  max_left_steering_angle: 0.65 #0.5235987756 #radians (30 deg)
+  steering_angle_is_in_radians: true #false means angle is in degrees
+
+  max_forward_vel: 3.0 #meters/sec (just an estimated guess for allowable speed)
+  min_forward_vel: 0.0 #find out later
+  max_reverse_vel: -3.0 #meters/sec (just an estimated guess for allowable speed)
+  min_reverse_vel: -0.0 #find out later, (don't get confused here; numerically, min_reverse_vel > max_reverse_vel)
+
+  max_right_servo_feedback_val: 694 #as read from the servo when steering is at full 30 degrees right
+  max_left_servo_feedback_val: 309 #as read from the servo when steering is at full 30 degrees left
+
+  max_capable_forward_speed: 13.0 #(I monitored between 12 and 13 m/s) #17.8816 #40 mph assumed
+  max_capable_reverse_speed: 13.0 #17.8816 #might be less than forward vel
+
+  max_accel: 0.05 # m/s^2, (!must be set correctly to prevent the vehicle from popping a wheely). A value of 0.05 works well to avoid the ESC break issue.
+
+  pid_p: 0
+  pid_i: 0
+  pid_d: 0
+  pid_ff: 0

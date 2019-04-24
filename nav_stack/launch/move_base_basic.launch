@@ -1,0 +1,19 @@
+<launch>
+
+   <master auto="start"/>
+ <!-- Run the map server --> 
+    <!--<node name="map_server" pkg="map_server" type="map_server" args="$(find avc)/map/map.yaml my_map_resolution"/>-->
+    <node name="map_server" pkg="map_server" type="map_server" args="$(find nav_stack)/maps/braden_map.yaml my_map_resolution"/>
+
+ <!--- Run AMCL --> 
+    <include file="$(find amcl)/examples/amcl_diff.launch" />
+
+   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <rosparam file="$(find nav_stack)/config_basic/costmap_common_params_basic.yaml" command="load" ns="global_costmap" /> 
+    <rosparam file="$(find nav_stack)/config_basic/costmap_common_params_basic.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find nav_stack)/config_basic/local_costmap_params_basic.yaml" command="load" />
+    <rosparam file="$(find nav_stack)/config_basic/global_costmap_params_basic.yaml" command="load" /> 
+    <rosparam file="$(find nav_stack)/config_basic/base_local_planner_params_basic.yaml" command="load" />
+ </node>
+
+</launch> 

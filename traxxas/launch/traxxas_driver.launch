@@ -1,0 +1,14 @@
+<launch>
+  <master auto="start"/>
+
+  <!-- load the parameters as args into the traxxas servo_and_esc_driver node -->
+  <arg name="traxxas_params" default="$(find traxxas)/config/traxxas_params.yaml"/>
+  <!-- Run the traxxas_driver node -->
+  <node name="traxxas_driver" pkg="traxxas" type="esc_driver" args="$(arg traxxas_params)" output="screen"/>
+
+  <!-- load vehicle parameters globaly, as some parameters will be used by other processes -->
+  <rosparam file="$(find traxxas)/config/traxxas_params.yaml" command="load"/>
+
+</launch>
+  
+  
