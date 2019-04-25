@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 
 <launch>
+  <arg name="master" default="true"/>
 
   <rosparam file="$(find traxxas)/config/port_config.yaml" command="load"/>
   
@@ -10,9 +11,10 @@
 
   <arg name="model" default="$(find avc)/urdf/model.urdf"/>
  
-   <param name="robot_description" command="$(find xacro)/xacro --inorder '$(arg model)'" /> 
- 
+ <group if="$(arg master)">
+  <param name="robot_description" command="$(find xacro)/xacro --inorder '$(arg model)'" /> 
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+</group>
 
   <include file="$(find avc)/launch/includes/sensors/static_transforms.launch.xml" />
 

@@ -28,13 +28,13 @@ def p1_vel_callback(msg):
 def p2_servo_callback(msg):
     #global servo_pub
     if (rospy.Time.now().to_sec() - time_p1) > T_p1:
-        msg.data*=7.5
+        # msg.data*=7.5
         servo_pub.publish(msg)
 
 def p2_vel_callback(msg):
     #global vel_pub
     if (rospy.Time.now().to_sec() - time_p1) > T_p1:
-        msg.data*=7.5
+        msg.data*=2
         vel_pub.publish(msg)
 
 def joyCallback(msg):
@@ -69,8 +69,10 @@ def joyCallback(msg):
 if __name__=='__main__':
     try:
         rospy.init_node('traxxas_cmd_mux')
-        current_topic_motor = '/cmd/set_servo_pos'
-        current_topic_servo = '/cmd/set_motor_vel'
+        # current_topic_motor = '/cmd/set_servo_pos'
+        # current_topic_servo = '/cmd/set_motor_vel'
+        current_topic_motor = '/joy/set_servo_pos'
+        current_topic_servo = '/joy/set_motor_vel'
         motor_topic = rospy.Subscriber(current_topic_motor, Float64, p2_servo_callback)
         servo_topic = rospy.Subscriber(current_topic_servo, Float64, p2_vel_callback)
         rospy.Subscriber('/joy', Joy, joyCallback)
