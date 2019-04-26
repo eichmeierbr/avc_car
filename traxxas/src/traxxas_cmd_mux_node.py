@@ -81,7 +81,10 @@ if __name__=='__main__':
         current_topic_motor = '/joy/set_servo_pos'
         current_topic_servo = '/joy/set_motor_vel'
 
-        Server(motorConfig,reconfig_callback)
+        # Server(motorConfig,reconfig_callback)
+
+        max_speed = rospy.get_param("TraxxasParameters/max_forward_vel")
+        min_speed = rospy.get_param("TraxxasParameters/speed_offset")
 
         motor_topic = rospy.Subscriber(current_topic_motor, Float64, p1_servo_callback)
         servo_topic = rospy.Subscriber(current_topic_servo, Float64, p1_vel_callback)

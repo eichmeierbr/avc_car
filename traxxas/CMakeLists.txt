@@ -34,6 +34,12 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+
+add_service_files(
+  FILES
+  unitStep.srv
+)
+
  add_executable(WheelOdometry src/wheel_odometry.cpp)
  add_executable(esc_driver src/esc_driver.cpp)
  add_executable(teleop_node src/joy_to_traxxas_node.cpp)

@@ -9,6 +9,7 @@
 #define J_SERVO_POS 2
 static double max_speed = 0;    //for velocity in m/s
 static double max_angle = 0;	//for steering angle in radians
+static double test_speed = 0;
 
 ros::Publisher escPub;
 ros::Subscriber joySub;
@@ -20,22 +21,22 @@ int i = 0;
 void JoyCallback(const sensor_msgs::Joy joy) {
     
     std_msgs::Float64 servoMsg;
+    bool sleep = false;
 
     escMsg.data = (max_speed*joy.axes[J_ESC_POS]);
     servoMsg.data = (-max_angle*joy.axes[J_SERVO_POS]);
-    /*    topic_tools::MuxSelect srv;
-        if (joy.buttons[5] == 1){
-        if (i == 0){
-            srv.request.topic = "/cmd/set_motor_vel";
-            }else{
-            srv.request.topic = "/joy/set_motor_vel";
-        }
-        client.call(srv);
-        i = (i + 1) % 2;
-        }
-    */  
+
+   if(joy.buttons[3]){
+        escMsg.data = (test_speed);
+        servoMsg.data = (0);
+        sleep = true;
+   } 
     escPub.publish(escMsg);
     servoPub.publish(servoMsg);
+
+    if(sleep){
+        ros::Duration(1).sleep();
+    }
 }
 
 void LoadParams() {
@@ -46,6 +47,10 @@ void LoadParams() {
     if (!ros::param::get("TraxxasParameters/max_right_steering_angle", max_angle))
     {
 	ROS_WARN("Could not load parameter: max_right_steering_angle\n using default value: %f", max_angle);
+    }
+    if (!ros::param::get("TraxxasParameters/test_speed", test_speed))
+    {
+	ROS_WARN("Could not load parameter: test_speed\n using default value: %f", max_angle);
     }
 }
 

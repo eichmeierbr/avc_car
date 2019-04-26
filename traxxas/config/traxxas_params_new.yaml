@@ -5,6 +5,7 @@ TraxxasParameters:
   max_left_steering_angle: 0.54 #0.5235987756 #radians (30 deg)
   steering_angle_is_in_radians: true #false means angle is in degrees
   max_speed: 10.0
+  test_speed: 1.0
 
 #  max_forward_vel: 10.0 #meters/sec (just an estimated guess for allowable speed)
 #  min_forward_vel: 0.0 #find out later
