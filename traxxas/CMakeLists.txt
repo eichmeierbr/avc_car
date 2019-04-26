@@ -12,15 +12,19 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   tf
+  dynamic_reconfigure
 )
 
 set(BUILD_FLAGS "-std=c++11 -Wuninitialized -Wall -Wextra")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${BUILD_FLAGS}")
 
+
+generate_dynamic_reconfigure_options( config/motor.cfg )
+
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES traxxas 
-  CATKIN_DEPENDS  geometry_msgs nav_msgs joy sensor_msgs roscpp rospy std_msgs tf
+  CATKIN_DEPENDS  geometry_msgs nav_msgs joy sensor_msgs roscpp rospy std_msgs tf dynamic_reconfigure
   DEPENDS system_lib
 )
 
