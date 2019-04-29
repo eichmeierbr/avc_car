@@ -23,14 +23,70 @@ void JoyCallback(const sensor_msgs::Joy joy) {
     std_msgs::Float64 servoMsg;
     bool sleep = false;
 
-    escMsg.data = (max_speed*joy.axes[J_ESC_POS]);
+    escMsg.data = (joy.axes[J_ESC_POS]);
     servoMsg.data = (-max_angle*joy.axes[J_SERVO_POS]);
 
-   if(joy.buttons[3]){
-        escMsg.data = (test_speed);
+//    if(joy.buttons[3]){
+//         escMsg.data = (test_speed);
+//         servoMsg.data = (0);
+//         sleep = true;
+//    }
+    if(joy.buttons[0]){
+        escMsg.data = (0.01);
         servoMsg.data = (0);
         sleep = true;
-   } 
+   }    
+   if(joy.buttons[3]){
+        escMsg.data = (0.1);
+        servoMsg.data = (0);
+        sleep = true;
+   }
+   if(joy.buttons[2]){
+        escMsg.data = (0.2);
+        servoMsg.data = (0);
+        sleep = true;
+   }
+   if(joy.buttons[4]){
+        escMsg.data = (0.3);
+        servoMsg.data = (0);
+        sleep = true;
+   }
+   if(joy.buttons[5]){
+        escMsg.data = (0.4);
+        servoMsg.data = (0);
+        sleep = true;
+   }
+   if(joy.buttons[6]){
+        escMsg.data = (0.5);
+        servoMsg.data = (0);
+        sleep = true;
+   }
+   if(joy.buttons[7]){
+        escMsg.data = (0.6);
+        servoMsg.data = (0);
+        sleep = true;
+   }
+   if(joy.buttons[8]){
+        escMsg.data = (0.7);
+        servoMsg.data = (0);
+        sleep = true;
+   }
+   if(joy.buttons[9]){
+        escMsg.data = (0.8);
+        servoMsg.data = (0);
+        sleep = true;
+   }
+   if(joy.buttons[10]){
+        escMsg.data = (0.9);
+        servoMsg.data = (0);
+        sleep = true;
+   }
+   if(joy.buttons[11]){
+        escMsg.data = (1.0);
+        servoMsg.data = (0);
+        sleep = true;
+   }
+
     escPub.publish(escMsg);
     servoPub.publish(servoMsg);
 
