@@ -50,7 +50,7 @@ void LoadParams() {
     }
     if (!ros::param::get("TraxxasParameters/test_speed", test_speed))
     {
-	ROS_WARN("Could not load parameter: test_speed\n using default value: %f", max_angle);
+	ROS_WARN("Could not load parameter: test_speed\n using default value: %f", test_speed);
     }
 }
 

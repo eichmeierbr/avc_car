@@ -18,7 +18,7 @@ TraxxasParameters:
 
   max_accel: 0.05 # m/s^2, (!must be set correctly to prevent the vehicle from popping a wheely). A value of 0.05 works well to avoid the ESC break issue.
 
-  test_speed: 0.5
+  test_speed: 1 # Percentage of full power between the speed offset and max_forward_vel
   speed_offset: 1.245 # Just below minimum threshold for ESC
 
 
